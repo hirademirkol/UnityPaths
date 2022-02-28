@@ -38,7 +38,8 @@ public class PathEditor : Editor
         {
             Ray mouseRay = HandleUtility.GUIPointToWorldRay(guiEvent.mousePosition);
             float enter = 0f;
-            _hitPlane.Set3Points(Path[Path.NumPoints-4], Path[Path.NumPoints-2], Path[Path.NumPoints-1]);
+            //New point will be put on the same plane with previous 3 points
+            _hitPlane.Set3Points(Path[Path.NumPoints-3], Path[Path.NumPoints-2], Path[Path.NumPoints-1]);
             Undo.RecordObject(pathObject, "Add Segment");
             _hitPlane.Raycast(mouseRay, out enter);
             Path.AddSegment(mouseRay.GetPoint(enter));
@@ -64,13 +65,29 @@ public class PathEditor : Editor
             {
                 Undo.RecordObject(pathObject, "Move Handle");
                 
-                if(i % 3 == 0)
+                Vector3 moveVector = newPos - Path[i];
+                // Main nodes move connected secondary nodes, secondary nodes move the opposite secondary node
+                switch(i % 3)
                 {
-                    Vector3 moveVector = newPos - Path[i];
+                    case 0:
                     if(i != 0)
                         Path.MovePointWith(i-1, moveVector);
                     if(i != Path.NumPoints - 1)
                         Path.MovePointWith(i+1, moveVector);
+                    break;
+                    
+                    case 1:
+                    if(i != 1)
+                        Path.MovePointWith(i-2, -moveVector);
+                    break;
+
+                    case 2:
+                    if(i != Path.NumPoints - 2)
+                        Path.MovePointWith(i+2, -moveVector);
+                    break;
+                    
+                    default:
+                    break;
                 }
                 Path.MovePoint(i, newPos);
             }
