@@ -3,15 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteInEditMode]
+[System.Serializable]
 public class PathObject : MonoBehaviour
 {
-    [HideInInspector]
+    [SerializeField, HideInInspector]
     public Path Path;
 
     void Reset()
     {
+        Path = new Path(transform.position);
+    }
+
+    void OnEnable()
+    {
         CreatePath();
     }
+
     void Awake()
     {
         CreatePath();
@@ -19,6 +26,7 @@ public class PathObject : MonoBehaviour
     
     public void CreatePath()
     {
-        Path = new Path(transform.position);
+        if(Path == null)
+            Path = new Path(transform.position);
     }
 }

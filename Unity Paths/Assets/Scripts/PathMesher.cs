@@ -2,98 +2,71 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(PathObject))]
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 [System.Serializable]
 [ExecuteInEditMode]
-public class PathMesher : MonoBehaviour
+public class PathMesher : PathSampler
 {
     [SerializeField, HideInInspector]
-    public Mesh Mesh;
+    public Mesh mesh;
 
-    public int PathDivisions = 10;
     public int VerticalDivisions = 6;
     public float Radius = 0.1f;
 
-    public Vector3[] SamplePoints
-    {
-        get
-        {
-            return _samplePoints;
-        }
-    }
-    public Vector3[] Normals
-    {
-        get
-        {
-            return _normals;
-        }
-    }
-    public Vector3[] Tangents
-    {
-        get
-        {
-            return _tangents;
-        }
-    }
-
-    Path _path;
-    int _oldPathDiv;
     int _oldVerDiv;
     float _oldRad;
-    Vector3[] _samplePoints;
-    Vector3[] _normals, _tangents;
 
-    bool _changed
+    protected override bool _changeMade 
     {
         get
         {
-            return PathDivisions != _oldPathDiv || VerticalDivisions != _oldVerDiv || Radius != _oldRad || _path.ChangeMade;
+            return base._changeMade || _oldVerDiv != VerticalDivisions || _oldRad != Radius;
         }
     }
 
-    void Awake()
-    {
-        Initialize();
-    }
-
-    void Update()
-    {
-        if(_changed)
-        {
-            _oldPathDiv = PathDivisions;
-            _oldVerDiv = VerticalDivisions;
-            _oldRad = Radius;
-            _path.ChangeMade = false;
-            MeshPath();
-        }
-    }
-    
     void Reset()
     {
         Initialize();
     }
-
-    void Initialize()
+    
+    void OnValidate()
     {
-        _oldPathDiv = PathDivisions;
+        UpdateMesh();
+    }
+
+    protected override void Initialize()
+    {
+        base.Initialize();
         _oldVerDiv = VerticalDivisions;
         _oldRad = Radius;
+
+        base.HandleChange += HandleChange;
+        base._path.HandleChange += HandleChange;
         
-        if(_path == null)
-            _path = GetComponent<PathObject>().Path;
-        if(Mesh == null)
-            Mesh = new Mesh();
+        if(mesh == null)
+            mesh = new Mesh();
         
-        GetComponent<MeshFilter>().mesh = Mesh;
+        GetComponent<MeshFilter>().mesh = mesh;
         MeshPath();
+    }
+
+    void UpdateMesh()
+    {
+        _oldVerDiv = VerticalDivisions;
+        _oldRad = Radius;
+        SamplerChanged();
+        MeshPath();
+    }
+
+    public new void HandleChange()
+    {
+        UpdateMesh();
     }
 
     void MeshPath()
     {
-        _samplePoints = _path.Sample(PathDivisions, out _tangents, out _normals);
-
+        SamplePath();
         Vector3[] verts = new Vector3[VerticalDivisions * PathDivisions];
         int[] tris = new int[6 * VerticalDivisions * (PathDivisions-1)];
 
@@ -146,9 +119,9 @@ public class PathMesher : MonoBehaviour
         }
 
 
-        Mesh.Clear();
-        Mesh.vertices = verts;
-        Mesh.triangles = tris;
-        Mesh.RecalculateNormals();
+        mesh.Clear();
+        mesh.vertices = verts;
+        mesh.triangles = tris;
+        mesh.RecalculateNormals();
     }
 }

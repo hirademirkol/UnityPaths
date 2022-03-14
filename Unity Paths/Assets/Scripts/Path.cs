@@ -8,8 +8,10 @@ public class Path
 {
     [SerializeField, HideInInspector]
     List<Vector3> _points;
-    [HideInInspector]
-    public bool ChangeMade =  false;
+
+    public delegate void ChangeDelegate();
+
+    public ChangeDelegate HandleChange;
 
     public Path(Vector3 start)
     {
@@ -44,6 +46,11 @@ public class Path
         }
     }
 
+    void ChangeMade()
+    {
+        HandleChange?.Invoke();
+    }
+
     public Vector3[] GetPointsInSegment(int i)
     {
         return new Vector3[] {_points[i*3], _points[i*3 + 1], _points[i*3 + 2], _points[i*3 + 3]};
@@ -52,13 +59,13 @@ public class Path
     public void MovePoint(int pointIndex, Vector3 newPos)
     {
         _points[pointIndex] = newPos;
-        ChangeMade = true;
+        ChangeMade();
     }
 
     public void MovePointWith(int pointIndex, Vector3 moveVector)
     {
         _points[pointIndex] += moveVector;
-        ChangeMade = true;
+        ChangeMade();
     }
 
     public void AddSegment(Vector3 endPos)
@@ -66,7 +73,7 @@ public class Path
         _points.Add(_points[_points.Count - 1] * 2 - _points[_points.Count - 2]);
         _points.Add((_points[_points.Count - 1] + endPos) * .5f);
         _points.Add(endPos);
-        ChangeMade = true;
+        ChangeMade();
     }
 
     public Vector3[] Sample(int n, out Vector3[] tangents, out Vector3[] normals)
