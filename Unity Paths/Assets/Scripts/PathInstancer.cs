@@ -30,12 +30,14 @@ public class PathInstancer : PathSampler
 
     void Reset()
     {
+        _initialized = false;
         if(InstancedMesh && InstanceTransform)
             Initialize();
     }
+
     void OnValidate()
     {
-        if(InstancedMesh && InstanceTransform)
+        if(InstancedMesh && InstanceTransform && _initialized)
             UpdateMesh();
     }
 
@@ -54,6 +56,7 @@ public class PathInstancer : PathSampler
             mesh = new Mesh();
 
         GetComponent<MeshFilter>().mesh = mesh;
+        _initialized = true;
         InstanceOnPath();
     }
 

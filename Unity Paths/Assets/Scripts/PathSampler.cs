@@ -4,6 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(PathObject))]
 [ExecuteInEditMode]
+ [AddComponentMenu("")]
 public class PathSampler : MonoBehaviour
 {
     public int PathDivisions = 10;
@@ -38,6 +39,8 @@ public class PathSampler : MonoBehaviour
     public ChangeDelegate HandleChange;
 
     int _oldPathDiv;
+    protected bool _initialized = false;
+
     
     protected virtual bool _changeMade
     {
@@ -54,6 +57,7 @@ public class PathSampler : MonoBehaviour
 
     void Awake()
     {
+        _initialized = false;
         Initialize();
     }
 

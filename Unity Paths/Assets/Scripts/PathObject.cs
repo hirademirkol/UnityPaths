@@ -8,15 +8,20 @@ public class PathObject : MonoBehaviour
 {
     [SerializeField, HideInInspector]
     public Path Path;
+    public bool Looping;
 
     void Reset()
     {
-        Path = new Path(transform.position);
+        Path = new Path(transform, Looping);
     }
 
     void OnEnable()
     {
         CreatePath();
+    }
+    void OnValidate()
+    {
+        Path.Looping = Looping;
     }
 
     void Awake()
@@ -26,7 +31,7 @@ public class PathObject : MonoBehaviour
     
     public void CreatePath()
     {
-        if(Path == null)
-            Path = new Path(transform.position);
+        if(Path.IsNull())
+            Path = new Path(transform, Looping);
     }
 }

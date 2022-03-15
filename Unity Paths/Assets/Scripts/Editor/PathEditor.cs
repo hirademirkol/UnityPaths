@@ -20,8 +20,7 @@ public class PathEditor : Editor
     void OnEnable()
     {
         pathObject = (PathObject)target;
-        if(Path == null)
-            pathObject.CreatePath();
+        pathObject.CreatePath();
     }
 
     void OnSceneGUI()
@@ -36,6 +35,11 @@ public class PathEditor : Editor
         
         if(guiEvent.type == EventType.MouseDown && guiEvent.button == 0 && guiEvent.shift)
         {
+            if(Path.Looping)
+            {
+                Debug.Log("Not possible to add point when looping.");
+                return;
+            }
             Ray mouseRay = HandleUtility.GUIPointToWorldRay(guiEvent.mousePosition);
             float enter = 0f;
             //New point will be put on the same plane with previous 3 points
@@ -70,19 +74,19 @@ public class PathEditor : Editor
                 switch(i % 3)
                 {
                     case 0:
-                    if(i != 0)
+                    if(Path.Looping || i != 0)
                         Path.MovePointWith(i-1, moveVector);
-                    if(i != Path.NumPoints - 1)
+                    if(Path.Looping || i != Path.NumPoints - 1)
                         Path.MovePointWith(i+1, moveVector);
                     break;
                     
                     case 1:
-                    if(i != 1)
+                    if(Path.Looping || i != 1)
                         Path.MovePointWith(i-2, -moveVector);
                     break;
 
                     case 2:
-                    if(i != Path.NumPoints - 2)
+                    if(Path.Looping || i != Path.NumPoints - 2)
                         Path.MovePointWith(i+2, -moveVector);
                     break;
                     
